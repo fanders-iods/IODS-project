@@ -1,8 +1,9 @@
 ---
 title: "IODS course project"
+author: "Your Name"
 output:
   html_document:
-    theme: cosmo
+    theme: readable
     toc: true
     toc_depth: 2
     fig_caption: true
