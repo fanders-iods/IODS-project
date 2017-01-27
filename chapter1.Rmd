@@ -8,4 +8,6 @@ After a quick support ticket to the IT helpdesk team I decided to connected to m
 
 After this ordeal, working with DataCamp was easy and the assignments were a breeze. Or so I thought while I was completing the generic "Introduction to R" assignments, but not the course-specific assignments that I discovered later.
 
+The course-specific assignments were remarkably harder than the really basic and numerous tasks of the generic course. Having some programming experience from the olden days, I found R to be quite user friendly with its clear syntax. The assignments concentrated on explaining the various data types of R and didn't yet contain any real data wrangling. I hope we'll get to that (in a slow and orderly manner suitable for a non-statistician) during the next weeks.
+
 My Github repo is [here](https://github.com/fanders-iods/IODS-project).
