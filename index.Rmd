@@ -1,6 +1,6 @@
 ---
 title: "IODS course project"
-author: "Your Name"
+author: "Tuomas Tiihonen"
 output:
   html_document:
     theme: readable
