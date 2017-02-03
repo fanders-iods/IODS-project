@@ -1,7 +1,111 @@
-# Insert chapter 2 title here
+---
+title: "Chapter 2"
+author: "Tuomas Tiihonen"
+date: "February 1, 2017"
+output: html_document
+---
 
-*Describe the work you have done this week and summarize your learning.*
+# Regression and model validation - analysis
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+This week has been hell for a person who has no real experience from maths, nor has he had any real interest to learn any until now.
+
+### 1. Reading the data and exploring it
+First we read the local data file and check its structure and dimensions. As we've written the file as csv, we don't need to explicitly state the separator and header.
+```{r Read csv-file, echo=TRUE}
+rawdata <- read.csv("Z:/IODS-project/data/learning2014.csv")
+```
+
+First we inspect the structure and dimensions of the data we read from a comma-separated values file in the data directory.
+
+```{r Structure and dimensions of the data frame, echo=TRUE}
+str(rawdata)
+dim(rawdata)
+```
+
+The imported data is a subset of survey data collected from students. Their answers to a set of 32 questions have been categorised to measure their self-evaluated tendency towards deep-, strategic-, and surface learning. Their gender, age, and global attitude towards statistics was also asked. Students who received zero points from the course exam are filtered out for this dataset.
+
+The dataset includes 166 observations in 7 dimensions.
+
+<!-- access the GGally and ggplot2 libraries to produce plots later -->
+```{r Load libraries for plotting, include=FALSE}
+library(GGally)
+library(ggplot2)
+```
+
+### 2. Delving deeper into the data and exploring variables
+
+<!-- create a more advanced plot matrix with ggpairs() -->
+You should be familiar with our source data now. Let's examine the whole dataset as a graphical representation, and we can hopefully see some interesting convergence in our data. We now assume that there exists some correlation between the exam points the student has accrued and the other variables. 
+
+```{r}
+p <- ggpairs(rawdata, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+p
+```
+
+From the graphical representation of the data we can see that that there is a moderate positive correlation between exam points and attitude ($\mathit{r}=.43$), while the correlation of other variables with exam points is very weak. ($\mathit{r} <.2$) The variables correlate generally quite weakly, the exception being the weak negative correlation between surface learning with deep learning ($\mathit{r} = -.32$)
+
+Especially interesting is the relationship between age and all the numeric variables, where only very weak correlations can be found. ($\mathit{r} \le \pm .141$) 
+
+Next we'll take a look at the summaries of the variables.
+```{r}
+summary(rawdata)
+```
+
+ 
+
+### 3. Choosing variables, fitting a regression model and interpreting it
+
+Based on the correlation between the variables, we now select attitude, strategic learning tendency and surface learning tendency as explanatory variables in a linear regression model, where exam points are the dependent variable. We anticipate that the dependent variable shows a statistically significant dependency ($p < .05$) to the explanatory variables.
+
+We also print the summary of the model for further analysis.
+```{r}
+my_model1 <- lm(points ~ attitude + stra + surf, data = rawdata)
+```
+
+
+```{r}
+summary(my_model1)
+```
+
+The residuals conform moderately to normal distribution, though there is slightly more deviance towards the lower end of the cases. 
+
+The logistic regression coefficients give the change in the logistic odds of the outcome for a one unit increase in the predictor variable. Hence, for each unit increase in attitude the logistic odds of higher exam points increase by ~0.34.
+
+The estimated coefficient of the variable essentially tells us the value of the slope calculated by the regression. The standard error of the coefficient estimate should optimally be at least a magnitude less than the estimated coefficient, and this is true only for attitude.
+
+The probability that each variable would NOT be relevant is displayed as the Pr(>|t|). For attitude, the probability is 0.0000000193, which is statistically significant on the selected threshold ($p<.05$). For strategic learning the probability is 0.11716 and for surface learning 0.46563, both of which are over the selected threshold for statistic significance. 
+
+#### Change model by dropping insignificant variables
+
+We now change the model to include only attitude as the sole explanatory variable and print out the summary of the model.
+
+```{r}
+my_model1 <- lm(points ~ attitude, data = rawdata)
+```
+
+### 4. Analysing the new model
+
+We now print the summary of the renewed model for analysis.
+
+```{r}
+summary(my_model1)
+```
+
+The higher value of the F-statistic (38.61 > 14.13) implies that the removal of the statistically insignificant variables resulted in better performance of the model with fewer variables.
+
+The Multiple R-square value evaluates the quality of the fit of the model, with higher values indicating a better fit and a value of 1 indicating a perfect fit. The lower R-squared of the new model compared to the model with more variables (0.1906 < 0.2073) implies that the new model would be a worse fit than the previous one. The R-squared in this test implies that ~19% of the exam points are due to the student's attitude, but even a good fit does NOT always imply causation
+
+Lastly we diagnose the new model.
+
+### 5. Diagnostic plots of the model and their analysis
+
+```{r}
+par(mfrow = c(2,2))
+plot(my_model1, which = c(1:2, 5))
+```
+
+The basic assumption of the first model - that all of the original three explanatory variables would have a statistically significant connection to the dependent variable - was false.
+
+In the new model, the three outliers (low exam points for students with a highly positive attitude towards statistics) are clearly visible.
+
+The lack of Cook's distance on the residuals v leverage plot shows that there are no overly influential data points in the selected cases, i.e. even the high attitude-low score cases are a passable fit to the model.
