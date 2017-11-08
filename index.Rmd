@@ -19,7 +19,12 @@ output:
   
 ***
   
-```{r child = "chapter2.Rmd", echo=TRUE}
+```{r child = "chapter2.Rmd", eval=FALSE, echo=FALSE}
+```
+
+***
+  
+```{r child = "chapter3.Rmd", eval=FALSE, echo=FALSE}
 ```
 
 ***
