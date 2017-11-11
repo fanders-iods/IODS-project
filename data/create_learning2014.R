@@ -1,4 +1,4 @@
-# Tuomas Tiihonen, 29.1.2017, This is my first R script and this is going to be a data wrangling exercise.
+# Tuomas Tiihonen, 11.11.2017, This is a data wrangling exercise.
 # define working directory
 setwd('Z:/IODS-project/data/')
 

@@ -1,7 +1,7 @@
 ---
 title: "Chapter 2"
 author: "Tuomas Tiihonen"
-date: "February 1, 2017"
+date: "November 11, 2017"
 output: html_document
 ---
 
@@ -42,7 +42,7 @@ p <- ggpairs(rawdata, mapping = aes(col = gender, alpha = 0.3), lower = list(com
 p
 ```
 
-From the graphical representation of the data we can see that that there is a moderate positive correlation between exam points and attitude ($\mathit{r}=.43$), while the correlation of other variables with exam points is very weak. ($\mathit{r} <.2$) The variables correlate generally quite weakly, the exception being the weak negative correlation between surface learning with deep learning ($\mathit{r} = -.32$)
+From the graphical representation of the data we can see that that there is a moderate positive correlation between exam points and attitude ($\mathit{r}=.44$), while the correlation of other variables with exam points is very weak. ($\mathit{r} <.2$) The variables correlate generally quite weakly, the exception being the weak negative correlation between surface learning with deep learning ($\mathit{r} = -.32$)
 
 Especially interesting is the relationship between age and all the numeric variables, where only very weak correlations can be found. ($\mathit{r} \le \pm .141$) 
 
