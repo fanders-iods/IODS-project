@@ -12,7 +12,7 @@ This week has been hell for a person who has no real experience from maths, nor 
 ### 1. Reading the data and exploring it
 First we read the local data file and check its structure and dimensions. As we've written the file as csv, we don't need to explicitly state the separator and header.
 ```{r Read csv-file, echo=TRUE}
-rawdata <- read.csv("Z:/IODS-project/data/learning2014.csv")
+rawdata <- read.csv("/Volumes/tuti-1/IODS-project/data/learning2014.csv")
 ```
 
 First we inspect the structure and dimensions of the data we read from a comma-separated values file in the data directory.

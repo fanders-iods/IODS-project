@@ -1,0 +1,134 @@
+---
+title: "Chapter 3 - Logistic regression"
+author: "Tuomas Tiihonen"
+date: "22 november 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Logistic regression - analysis
+
+
+
+```{r Load dplyr library, include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+### Tasks 1-3
+
+```{r Read csv-file and glimpse, echo=TRUE}
+rawdata <- read.csv("/Volumes/tuti-1/IODS-project/data/alc.csv")
+attach(rawdata)
+glimpse(rawdata)
+```
+From the glimpse() to the data we can see that is comprises 382 observations of 35 variables. The observations of the variables containt the attributes of the students, their socio-economic information and additional background information like the existence of internet access and the quality of their family relationships. The students' alcohol usage is measured by daily and weekly consumption on a scale of 1-5, the average of the two, and a binary high consumption variable with an average consumption of over 2 as the limit.
+
+Further information on all of the variables, except for the calulated ones, is available from the [source](https://archive.ics.uci.edu/ml/datasets/STUDENT+ALCOHOL+CONSUMPTION) 
+
+We now select four interesting variables for further analysis and make a hypothesis for each in relation to their effect on the students' alcohol consumption.
+  
+Family relationships:  
+H0: The quality of family relationships has no correlation to high alcohol consumption.  
+H1: The quality of family relationships has a negative correlation to high alcohol consumption.  
+  
+Absences:  
+H0: The amount of absences has no correlation to high alcohol consumption.  
+H1: The amount of absences has a positive correlation to high alcohol consumption.  
+  
+Gender:  
+H0: Gender has no correlation to high alcohol consumption.  
+H1: Female students are less prone to high alcohol consumption than male students.  
+  
+Extra-curriculars:  
+H0: Engaging in extra-curricular activities has no correlation to high alcohol consumption.  
+H1: Students with extra-curricular activities are less prone to high alcohol consumption than students with no extra-curricular activities.  
+  
+### Task 4
+
+We will proceed with examining the relationships between variables pertinent for each hypothesis to average alcohol consumption.
+
+#### Family relationships
+
+```{r Plot family realtionships, echo=TRUE}
+plot(factor(high_use)~factor(famrel), xlab="Quality of family relationships", ylab="Avg alcohol use", main="Family relationships")
+```
+
+The correlation of the quality of family relationships to alcohol use does not seem large. The prevalence of high alcohol consumption is approximately the same in students with poor quality family relationships (=1) and students with high quality family relationships (=5). The number of students with the poorest quality family relationships appears to be the smallest in the dataset, while a large majority of students have evaluated their family relationships to be in the best two categories (4-5).
+  
+#### Absences
+
+```{r Plot absences, echo=TRUE}
+plot(factor(high_use), absences, xlab="High alcohol use", ylab="Number of absences", main="Absences", type = "l")
+```
+  
+From the boxplot we can see that students with more absences are more prone to high alcohol use, as the median, upper quartile and maximum (excluding outliers) for low alcohol use stay at just over 10 absences.
+  
+#### Gender
+
+```{r Plot gender, echo=TRUE}
+plot(factor(high_use)~factor(sex), xlab="Gender of the student", ylab="High alcohol use", main="Gender")
+```
+  
+The data shows that female students consume less alcohol than male students. Furthermore, the proportions of observations from females and males are quite even.  
+  
+#### Extra-curriculars
+
+```{r Plot extras, echo=TRUE}
+plot(factor(high_use)~factor(activities), xlab="Does the student engage in extracurriculars", ylab="High alcohol consumption", main="Extracurriculars")
+```
+  
+Engaging in extracurricular activities does not seem to correlate to a large degree with high alcohol consumption.  
+  
+### Task 5
+  
+Next we use use a linear regression model to explore the relationships in a more accurate manner.  
+
+```{r Linear regression, echo=TRUE}
+m <- glm(high_use ~ famrel + absences + sex + activities, data = rawdata, family = "binomial")
+summary(m)
+```
+```{r Odds ratios and confidence intervals, echo=TRUE}
+OR <- coef(m) %>% exp
+CI <- confint(m) %>% exp
+cbind(OR, CI)
+```
+
+### Task 6
+
+```{r Probabilities, echo=TRUE}
+# predict() the probability of high_use
+probabilities <- predict(m, type = "response")
+
+# add the predicted probabilities to 'alc'
+rawdata <- mutate(rawdata, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+rawdata <- mutate(rawdata, prediction = probability > 0.5)
+
+# tabulate the target variable versus the predictions
+table(high_use = rawdata$high_use, prediction = rawdata$prediction)
+```
+
+### Bonus: 10-fold cross-validation
+
+```{r 10-fold, echo=TRUE}
+# define a loss function (average prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# compute the average number of wrong predictions in the (training) data
+loss_func(class = rawdata$high_use, prob = rawdata$probability)
+
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = rawdata, cost = loss_func, glmfit = m, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
