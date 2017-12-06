@@ -1,0 +1,94 @@
+---
+title: "RStudio Exercise 5"
+author: "Tuomas Tiihonen"
+date: "5 joulukuuta 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+# Assignment 1 - read, explore, and describe
+Let's first do some basic setup..
+```{r Assignment 1, eval = TRUE, echo = TRUE, include = TRUE}
+setwd('/Volumes/tuti/IODS-project/data/')
+human <- read.csv("human.txt", header = TRUE)
+rownames(human) <- human$X
+human <- subset(human, select = -X)
+```
+
+Then we'll explore the dataset.
+```{r Structure, echo = TRUE}
+str(human)
+```
+The dataset consists of the following data for each of the countries:
+
+"Edu2.FM" = Ratio of females to each male with at least secondary education  
+"Labo.FM" = Ratio of females to each male in the labour force  
+"Edu.Exp" = Expected years of schooling  
+"Life.Exp" = Life expectancy at birth  
+"GNI" = Gross National Income per capita in US Dollars  
+"Mat.Mor" = Maternal mortality ratio  
+"Ado.Birth" = Adolescent birth rate  
+"Parli.F" = Percetange of female representatives in parliament  
+
+
+```{r Dimensions}
+dim(human)
+```
+The dataset contanins 155 observations and 8 variables.
+
+
+# Assignment 2 - Graphical overview and summaries
+```{r Correlation plot, echo = -(1:2)}
+library(corrplot)
+library(magrittr)
+cor_matrix<-cor(human) %>% round(digits=2)
+cor_matrix
+corrplot.mixed(cor_matrix, upper="square", tl.cex = 0.7)
+```
+
+```{r Summary}
+summary(human)
+```
+# Assignment 3 - PCA 
+
+```{r PCA with unstandardised data}
+pca_human <- prcomp(human)
+biplot(pca_human, choices = 1:2, cex = 0.6)
+```
+
+# Assignment 4 - Standardisation and new PCA
+
+```{r Standardisation and new PCA}
+human_std <- scale(human)
+pca_human_std <- prcomp(human_std)
+biplot(pca_human_std, choices = 1:2, cex = 0.6)
+```
+
+# Assignment 5 - Interpretations
+
+# Assignment 6 - MCA of tea dataset
+```{r Tea time setup}
+library(FactoMineR)
+library(tidyr)
+library(ggplot2)
+library(factoextra)
+```
+
+```{r Tea time}
+tea <- read.table("http://factominer.free.fr/book/tea.csv",header=TRUE,sep=";")
+str(tea)
+dim(tea)
+tea <- subset(tea, select = -age)
+gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") 
+```
+
+```{r MCA}
+mca <- MCA(tea, graph = FALSE)
+summary(mca)
+fviz_screeplot(mca, addlabels = TRUE)
+fviz_mca_biplot(mca, repel = TRUE, ggtheme = theme_minimal())
+#biplot(mca, choices = 1:2, cex = 0.6)
+plot(mca, habillage = "quali", invisible=c("ind"))
+```

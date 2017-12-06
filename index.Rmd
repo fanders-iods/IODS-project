@@ -28,3 +28,7 @@ output:
 ```
 
 ***
+```{r child = "chapter5.Rmd", echo=TRUE}
+```
+
+***
