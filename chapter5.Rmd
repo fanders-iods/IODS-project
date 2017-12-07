@@ -36,7 +36,7 @@ The dataset consists of the following data for each of the countries:
 "Edu.Exp" = Expected years of schooling  
 "Life.Exp" = Life expectancy at birth  
 "GNI" = Gross National Income per capita in US Dollars  
-"Mat.Mor" = Maternal mortality ratio  
+"Mat.Mor" = Maternal mortality rate  
 "Ado.Birth" = Adolescent birth rate  
 "Parli.F" = Percetange of female representatives in parliament  
 
@@ -54,20 +54,23 @@ cor_matrix
 corrplot.mixed(cor_matrix, upper="square", tl.cex = 0.7)
 ```
 
-From the correlation plot we can see that the percentage of female representatives in parliament and the ratio of females to males in the labour force do not correlate strongly with any of the other variables ($\mathit{r} \le \pm .25$). Their strongest correlation is between each other.
+From the correlation plot we can see that the percentage of female representatives in parliament and the ratio of females to males in the labour force do not correlate strongly with any of the other variables ($\mathit{r} \le \pm .25$). Their strongest correlation is with each other.
 
 The strongest correlation coefficients ($\mathit{r} \ge\pm.7$) can be found between  
 
-* Maternal mortality ratio and life expectancy ($\mathit{r}=-.86$)  
+* Maternal mortality rate and life expectancy ($\mathit{r}=-.86$)  
 * Expected years of schooling and life expectancy ($\mathit{r}=.79$)  
-* Maternal mortality ratio and adolescent birth ratio ($\mathit{r}=.76$)  
-* Expected years of schooling and maternal mortality ratio ($\mathit{r}=-.74$)  
-* Adolescent birth ratio and life expectancy ($\mathit{r}=-.73$)  
-* Expected years of schooling and adolescent birth ratio ($\mathit{r}=-.7$)  
+* Maternal mortality rate and adolescent birth rate ($\mathit{r}=.76$)  
+* Expected years of schooling and maternal mortality rate ($\mathit{r}=-.74$)  
+* Adolescent birth rate and life expectancy ($\mathit{r}=-.73$)  
+* Expected years of schooling and adolescent birth rate ($\mathit{r}=-.7$)  
 
 ```{r Summary}
 summary(human)
 ```
+
+The distributions of the variables conform quite well with normal distribution. GNI and maternal mortality rate seem a bit suspect, as the former has a maximum well beyond the first three first quartiles, and the latter is skewed towards the third quartile.
+
 ## Task 3 - PCA 
 
 ```{r PCA with unstandardised data}
@@ -83,14 +86,15 @@ pca_human_std <- prcomp(human_std)
 biplot(pca_human_std, choices = 1:2, cex = 0.4)
 ```
 
-The unstandardised plot does not offer substantial information in addition to the large variance in GNI. From the GNI we can deduce that oil-rich countries are leading the pack with Singapore and Luxembourg. The effect of the GNI dominance in the first principal component (PC1) makes the second and subsequence principal components undiscernible.  
+The unstandardised plot does not offer substantial information in addition to the large variance in GNI, and the GNI outliers that cause the unreadability of the plot. From the GNI we can deduce that oil-rich countries are leading the pack with Singapore and Luxembourg. The effect of the GNI dominance in the first principal component (PC1) makes the second and subsequence principal components undiscernible.  
 
 Standardising the variables make the principal component graph more readable by diminishing the dominance of GNI.
 
 From the standardised biplot we can find three dimensions of interconnected variables: GNI, life expectancy, expected years of schooling and the ratio of females to males with at least secondary education are grouped together; the ratio of females to males in the labour force are grouped together, and maternal mortality rate and adolescent birth rate are grouped together. These groupings correspond to the correlation coefficients analysed earlier.  
 
 ## Task 5 - Interpretations
-When analysed through principal component 1, the first grouping is a polar opponent to the third grouping, with both adolescent births and maternal mortality decreasing when GNI, life expectancy, and education levels increase.  
+
+When analysed through principal component 1, the first grouping is a polar opposite to the third grouping, with both adolescent births and maternal mortality decreasing when GNI, life expectancy, and education levels increase.  
 
 
 
@@ -110,9 +114,9 @@ dim(tea)
 ```
 There are 300 observations of 36 variables.
 
-```{r Tea time column drop and plot}
+```{r Tea time column drop and plot, fig.width = 12, fig.height = 12}
 tea <- subset(tea, select = -age)
-gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") 
+gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
 ```
 
 ```{r MCA 1}
@@ -122,7 +126,19 @@ fviz_screeplot(mca, addlabels = TRUE)
 ```
 
 ```{r MCA 2}
+fviz_mca_var(mca, choice = "mca.cor", 
+            repel = TRUE, # Avoid text overlapping (slow)
+            ggtheme = theme_minimal())
 fviz_mca_biplot(mca, repel = TRUE, ggtheme = theme_minimal())
+# Contributions of rows to dimension 1
+fviz_contrib(mca, choice = "var", axes = 1, top = 15)
+# Contributions of rows to dimension 2
+fviz_contrib(mca, choice = "var", axes = 2, top = 15)
 #biplot(mca, choices = 1:2, cex = 0.6)
+fviz_mca_var(mca, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             repel = TRUE, # avoid text overlapping (slow)
+             ggtheme = theme_minimal()
+             )
 plot(mca, habillage = "quali", invisible=c("ind"))
 ```
