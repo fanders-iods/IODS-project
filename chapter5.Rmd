@@ -119,7 +119,16 @@ tea <- subset(tea, select = -age)
 gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
 ```
 
+The graphical representation of the variables shows, that there are some categories with very low frequencies that may distort the analysis. Hence the following variables should be dropped before engaging in further analysis:
+
+* after.dinner
+* after.lunch
+* home
+* iron.absorption
+* slimming
+
 ```{r MCA 1}
+tea <- subset(tea, select = -c(after.dinner, after.lunch, home, iron.absorption, slimming))
 mca <- MCA(tea, graph = FALSE)
 summary(mca)
 fviz_screeplot(mca, addlabels = TRUE)
