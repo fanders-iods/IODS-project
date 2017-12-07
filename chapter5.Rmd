@@ -5,20 +5,28 @@ date: "5 joulukuuta 2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+# Dimensionality reduction
+
+```{r setup chapter 5, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(corrplot)
+library(magrittr)
+library(FactoMineR)
+library(tidyr)
+library(ggplot2)
+library(factoextra)
 ```
-# Assignment 1 - read, explore, and describe
+## Task 1 - read, explore, and describe
 Let's first do some basic setup..
 ```{r Assignment 1, eval = TRUE, echo = TRUE, include = TRUE}
-setwd('/Volumes/tuti/IODS-project/data/')
+setwd('Z:/IODS-project/data/')
 human <- read.csv("human.txt", header = TRUE)
 rownames(human) <- human$X
 human <- subset(human, select = -X)
 ```
 
 Then we'll explore the dataset.
-```{r Structure, echo = TRUE}
+```{r Structure of human, echo = TRUE}
 str(human)
 ```
 The dataset consists of the following data for each of the countries:
@@ -33,61 +41,87 @@ The dataset consists of the following data for each of the countries:
 "Parli.F" = Percetange of female representatives in parliament  
 
 
-```{r Dimensions}
+```{r Dimensions of human}
 dim(human)
 ```
 The dataset contanins 155 observations and 8 variables.
 
 
-# Assignment 2 - Graphical overview and summaries
-```{r Correlation plot, echo = -(1:2)}
-library(corrplot)
-library(magrittr)
+## Task 2 - Graphical overview and summaries
+```{r Correlation plot}
 cor_matrix<-cor(human) %>% round(digits=2)
 cor_matrix
 corrplot.mixed(cor_matrix, upper="square", tl.cex = 0.7)
 ```
 
+From the correlation plot we can see that the percentage of female representatives in parliament and the ratio of females to males in the labour force do not correlate strongly with any of the other variables ($\mathit{r} \le \pm .25$). Their strongest correlation is between each other.
+
+The strongest correlation coefficients ($\mathit{r} \ge\pm.7$) can be found between  
+
+* Maternal mortality ratio and life expectancy ($\mathit{r}=-.86$)  
+* Expected years of schooling and life expectancy ($\mathit{r}=.79$)  
+* Maternal mortality ratio and adolescent birth ratio ($\mathit{r}=.76$)  
+* Expected years of schooling and maternal mortality ratio ($\mathit{r}=-.74$)  
+* Adolescent birth ratio and life expectancy ($\mathit{r}=-.73$)  
+* Expected years of schooling and adolescent birth ratio ($\mathit{r}=-.7$)  
+
 ```{r Summary}
 summary(human)
 ```
-# Assignment 3 - PCA 
+## Task 3 - PCA 
 
 ```{r PCA with unstandardised data}
 pca_human <- prcomp(human)
-biplot(pca_human, choices = 1:2, cex = 0.6)
+biplot(pca_human, choices = 1:2, cex = 0.4)
 ```
 
-# Assignment 4 - Standardisation and new PCA
+## Task 4 - Standardisation and new PCA
 
 ```{r Standardisation and new PCA}
 human_std <- scale(human)
 pca_human_std <- prcomp(human_std)
-biplot(pca_human_std, choices = 1:2, cex = 0.6)
+biplot(pca_human_std, choices = 1:2, cex = 0.4)
 ```
 
-# Assignment 5 - Interpretations
+The unstandardised plot does not offer substantial information in addition to the large variance in GNI. From the GNI we can deduce that oil-rich countries are leading the pack with Singapore and Luxembourg. The effect of the GNI dominance in the first principal component (PC1) makes the second and subsequence principal components undiscernible.  
 
-# Assignment 6 - MCA of tea dataset
-```{r Tea time setup}
-library(FactoMineR)
-library(tidyr)
-library(ggplot2)
-library(factoextra)
-```
+Standardising the variables make the principal component graph more readable by diminishing the dominance of GNI.
 
-```{r Tea time}
+From the standardised biplot we can find three dimensions of interconnected variables: GNI, life expectancy, expected years of schooling and the ratio of females to males with at least secondary education are grouped together; the ratio of females to males in the labour force are grouped together, and maternal mortality rate and adolescent birth rate are grouped together. These groupings correspond to the correlation coefficients analysed earlier.  
+
+## Task 5 - Interpretations
+When analysed through principal component 1, the first grouping is a polar opponent to the third grouping, with both adolescent births and maternal mortality decreasing when GNI, life expectancy, and education levels increase.  
+
+
+
+## Task 6 - MCA of tea dataset
+```{r Tea time data read}
 tea <- read.table("http://factominer.free.fr/book/tea.csv",header=TRUE,sep=";")
+```
+
+```{r Tea time structure}
 str(tea)
+```
+
+We can now see that all of the variables except age are factors with 2-7 levels.
+
+```{r Tea time dimensions}
 dim(tea)
+```
+There are 300 observations of 36 variables.
+
+```{r Tea time column drop and plot}
 tea <- subset(tea, select = -age)
 gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") 
 ```
 
-```{r MCA}
+```{r MCA 1}
 mca <- MCA(tea, graph = FALSE)
 summary(mca)
 fviz_screeplot(mca, addlabels = TRUE)
+```
+
+```{r MCA 2}
 fviz_mca_biplot(mca, repel = TRUE, ggtheme = theme_minimal())
 #biplot(mca, choices = 1:2, cex = 0.6)
 plot(mca, habillage = "quali", invisible=c("ind"))
