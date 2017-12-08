@@ -75,7 +75,10 @@ The distributions of the variables conform quite well with normal distribution. 
 
 ```{r PCA with unstandardised data}
 pca_human <- prcomp(human)
-biplot(pca_human, choices = 1:2, cex = 0.4)
+summary(pca_human)
+prelabel <- round(100*summary(pca_human)$importance[2, ], digits = 1)
+label <- paste0(names(prelabel), " (", prelabel, "%)")
+biplot(pca_human, choices = 1:2, cex = 0.4, xlab = label[1], ylab = label[2])
 ```
 
 ## Task 4 - Standardisation and new PCA
@@ -83,7 +86,10 @@ biplot(pca_human, choices = 1:2, cex = 0.4)
 ```{r Standardisation and new PCA}
 human_std <- scale(human)
 pca_human_std <- prcomp(human_std)
-biplot(pca_human_std, choices = 1:2, cex = 0.4)
+summary(pca_human_std)
+prelabel_std <- round(100*summary(pca_human_std)$importance[2, ], digits = 1)
+label_std <- paste0(names(prelabel_std), " (", prelabel_std, "%)")
+biplot(pca_human_std, choices = 1:2, cex = 0.4, xlab = label_std[1], ylab = label_std[2])
 ```
 
 The unstandardised plot does not offer substantial information in addition to the large variance in GNI, and the GNI outliers that cause the unreadability of the plot. From the GNI we can deduce that oil-rich countries are leading the pack with Singapore and Luxembourg. The effect of the GNI dominance in the first principal component (PC1) makes the second and subsequence principal components undiscernible.  
